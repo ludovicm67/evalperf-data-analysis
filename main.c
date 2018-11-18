@@ -1,72 +1,11 @@
 #include "main.h"
+#include "flow.h"
 #include "matrix.h"
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
-static struct flow *flow_list = NULL;
-
-struct flow {
-  int fid;
-  bool destroyed;
-  double begin;
-  double end;
-  struct flow *next;
-};
-
-struct flow *new_flow(int fid, double begin) {
-  struct flow *f = malloc(sizeof(struct flow));
-  f->fid = fid;
-  f->destroyed = false;
-  f->begin = begin;
-  f->end = begin;
-  f->next = NULL;
-  return f;
-}
-
-void free_flow(struct flow *f) {
-  if (f == NULL)
-    return;
-  free_flow(f->next);
-  free(f);
-}
-
-void add_flow(int fid, double ts) {
-  struct flow *f;
-
-  // if it is the first flow, initialize it
-  if (flow_list == NULL) {
-    flow_list = new_flow(fid, ts);
-    return;
-  }
-
-  // loop through the list to find if it already exists or not
-  for (f = flow_list; f->next != NULL; f = f->next) {
-    if (f->fid == fid) {
-      f->end = ts;
-      return;
-    }
-  }
-
-  // if it's a new flow
-  f = new_flow(fid, ts);
-  f->next = flow_list;
-  flow_list = f;
-}
-
-int get_nb_flows(struct flow *f) {
-  int res;
-  if (f == NULL)
-    return 0;
-  res = 0;
-  while (f->next) {
-    res++;
-    f = f->next;
-  }
-  return res;
-}
 
 void treat_line(char *line, struct params *p) {
   double t;
@@ -103,7 +42,7 @@ void treat_line(char *line, struct params *p) {
   case 0:
   case 3:
   case 4:
-    add_flow(fid, t);
+    add_flow(p, fid, t);
     break;
   }
 }
@@ -148,20 +87,21 @@ void treat_file(struct params *p) {
 
 // init params with default values
 struct params new_params() {
-  struct params a;
-  a.mat_file = "res26.txt";
-  a.trace_file = "trace2650.txt";
-  a.nb_codes[0] = 0;
-  a.nb_codes[1] = 0;
-  a.nb_codes[2] = 0;
-  a.nb_codes[3] = 0;
-  a.nb_codes[4] = 0;
-  a.nb_nodes = 1;
-  return a;
+  struct params p;
+  p.mat_file = "res26.txt";
+  p.trace_file = "trace2650.txt";
+  p.nb_codes[0] = 0;
+  p.nb_codes[1] = 0;
+  p.nb_codes[2] = 0;
+  p.nb_codes[3] = 0;
+  p.nb_codes[4] = 0;
+  p.nb_nodes = 1;
+  p.flow_list = NULL;
+  return p;
 }
 
 int main(int argc, char *argv[]) {
-  struct params a = new_params();
+  struct params p = new_params();
   int c;
   int nb_errors;
 
@@ -169,10 +109,10 @@ int main(int argc, char *argv[]) {
   while ((c = getopt(argc, argv, "+f:m:")) != EOF) {
     switch (c) {
     case 'f':
-      a.trace_file = optarg;
+      p.trace_file = optarg;
       break;
     case 'm':
-      a.mat_file = optarg;
+      p.mat_file = optarg;
       break;
     case '?':
       nb_errors++;
@@ -184,22 +124,22 @@ int main(int argc, char *argv[]) {
   // char *line = NULL;
   // int i, j; // counters
   // size_t len = 0;
-  FILE *mat_stream = fopen(a.mat_file, "r");
+  FILE *mat_stream = fopen(p.mat_file, "r");
   if (mat_stream == NULL) {
     perror("fopen");
     exit(EXIT_FAILURE);
   }
 
-  a.nb_nodes = get_nb_nodes(mat_stream);
+  p.nb_nodes = get_nb_nodes(mat_stream);
 
-  // int mat[a.nb_nodes][a.nb_nodes];
-  // for (i = 0; i < a.nb_nodes; i++) {
+  // int mat[p.nb_nodes][p.nb_nodes];
+  // for (i = 0; i < p.nb_nodes; i++) {
   //   if (getline(&line, &len, mat_stream) == -1) {
   //     fprintf(stderr, "matrix file is empty\n");
   //     exit(EXIT_FAILURE);
   //   }
   //   tmp = line;
-  //   for (j = 0; j < a.nb_nodes; j++) {
+  //   for (j = 0; j < p.nb_nodes; j++) {
   //     mat[i][j] = atoi(strtok(tmp, " \t"));
   //     tmp = NULL;
   //   }
@@ -207,34 +147,34 @@ int main(int argc, char *argv[]) {
   // free(line);
   fclose(mat_stream);
 
-  if ((a.trace_fd = open(a.trace_file, O_RDONLY)) < 0) {
+  if ((p.trace_fd = open(p.trace_file, O_RDONLY)) < 0) {
     fprintf(stderr, "open: failure\n");
     exit(EXIT_FAILURE);
   }
 
-  treat_file(&a);
+  treat_file(&p);
 
-  if (close(a.trace_fd) < 0) {
+  if (close(p.trace_fd) < 0) {
     fprintf(stderr, "close: failure\n");
     exit(EXIT_FAILURE);
   }
 
   // global data
-  int nb_events = a.nb_codes[0] + a.nb_codes[1] + a.nb_codes[2] +
-                  a.nb_codes[3] + a.nb_codes[4];
-  printf("Number of nodes: %d\n", a.nb_nodes);
-  printf("Number of flows: %d\n", get_nb_flows(flow_list));
+  int nb_events = p.nb_codes[0] + p.nb_codes[1] + p.nb_codes[2] +
+                  p.nb_codes[3] + p.nb_codes[4];
+  printf("Number of nodes: %d\n", p.nb_nodes);
+  printf("Number of flows: %d\n", get_nb_flows(p.flow_list));
   printf("Number of events: %d\n", nb_events);
-  printf("Number of packets emited (code 0): %d\n", a.nb_codes[0]);
-  printf("Number of packets processed (code 2): %d\n", a.nb_codes[2]);
-  printf("Number of packets received (code 3): %d\n", a.nb_codes[3]);
-  printf("Number of destroyed packets (code 4): %d\n", a.nb_codes[4]);
+  printf("Number of packets emited (code 0): %d\n", p.nb_codes[0]);
+  printf("Number of packets processed (code 2): %d\n", p.nb_codes[2]);
+  printf("Number of packets received (code 3): %d\n", p.nb_codes[3]);
+  printf("Number of destroyed packets (code 4): %d\n", p.nb_codes[4]);
   printf("Number of packets lost (code 0 - 3): %d\n",
-         a.nb_codes[0] - a.nb_codes[3]);
+         p.nb_codes[0] - p.nb_codes[3]);
   printf("Lost rate: %f%%\n",
-         ((float)(a.nb_codes[0] - a.nb_codes[3]) / a.nb_codes[0]) * 100);
+         ((float)(p.nb_codes[0] - p.nb_codes[3]) / p.nb_codes[0]) * 100);
 
-  free_flow(flow_list);
+  free_flow(p.flow_list);
 
   exit(EXIT_SUCCESS);
 }
