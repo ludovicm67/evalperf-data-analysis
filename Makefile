@@ -1,8 +1,13 @@
-DEBUG := 0
-CFLAGS := -Wall -Wextra -Werror -O3 -DDEBUG=$(DEBUG)
-LDFLAGS := -O3
+DEBUG    := 0
+CFLAGS   := -Wall -Wextra -Werror -Wpedantic -Wstrict-aliasing -O3 -DDEBUG=$(DEBUG)
+LDFLAGS  := -O3
+SRC      := $(wildcard *.c)
+OBJ      := $(SRC:.c=.o)
 
-main: main.o
+main: $(OBJ)
+
+%.o: %.c
+	$(CC) -o $@ -c $< $(CFLAGS)
 
 .PHONY: debug
 debug:
@@ -11,6 +16,10 @@ debug:
 .PHONY: run
 run:
 	./main
+
+.PHONY: format
+format:
+	clang-format -i *.c *.h
 
 .PHONY: clean
 clean:
