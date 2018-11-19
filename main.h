@@ -1,6 +1,8 @@
 #ifndef __MAIN_H
 #define __MAIN_H
 
+#include <stdio.h>
+
 #ifndef DEBUG
 #define DEBUG 0
 #endif
@@ -14,6 +16,8 @@ struct params {
   int nb_nodes;
   int nb_codes[5]; // indexes representing code from 1 to 4
   struct flow *flow_list;
+  int *mat;
+  FILE *mat_stream;
 };
 
 struct params new_params();

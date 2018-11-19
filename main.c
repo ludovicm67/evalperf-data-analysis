@@ -120,32 +120,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  // char *tmp;
-  // char *line = NULL;
-  // int i, j; // counters
-  // size_t len = 0;
-  FILE *mat_stream = fopen(p.mat_file, "r");
-  if (mat_stream == NULL) {
-    perror("fopen");
-    exit(EXIT_FAILURE);
-  }
-
-  p.nb_nodes = get_nb_nodes(mat_stream);
-
-  // int mat[p.nb_nodes][p.nb_nodes];
-  // for (i = 0; i < p.nb_nodes; i++) {
-  //   if (getline(&line, &len, mat_stream) == -1) {
-  //     fprintf(stderr, "matrix file is empty\n");
-  //     exit(EXIT_FAILURE);
-  //   }
-  //   tmp = line;
-  //   for (j = 0; j < p.nb_nodes; j++) {
-  //     mat[i][j] = atoi(strtok(tmp, " \t"));
-  //     tmp = NULL;
-  //   }
-  // }
-  // free(line);
-  fclose(mat_stream);
+  init_matrix(&p);
 
   if ((p.trace_fd = open(p.trace_file, O_RDONLY)) < 0) {
     fprintf(stderr, "open: failure\n");
@@ -175,6 +150,9 @@ int main(int argc, char *argv[]) {
          ((float)(p.nb_codes[0] - p.nb_codes[3]) / p.nb_codes[0]) * 100);
 
   free_flow(p.flow_list);
+
+  print_matrix(&p);
+  free_matrix(&p);
 
   exit(EXIT_SUCCESS);
 }
