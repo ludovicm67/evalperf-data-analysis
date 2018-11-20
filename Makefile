@@ -6,9 +6,6 @@ OBJ      := $(SRC:.c=.o)
 
 main: $(OBJ)
 
-%.o: %.c
-	$(CC) -o $@ -c $< $(CFLAGS)
-
 .PHONY: debug
 debug:
 	$(MAKE) DEBUG=1

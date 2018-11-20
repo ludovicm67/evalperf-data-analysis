@@ -15,7 +15,7 @@ struct params {
   int trace_fd;
   int nb_nodes;
   int nb_codes[5]; // indexes representing code from 1 to 4
-  struct flow *flow_list;
+  struct list *flow_list;
   int *mat;
   FILE *mat_stream;
 };

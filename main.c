@@ -1,5 +1,6 @@
 #include "main.h"
 #include "flow.h"
+#include "list.h"
 #include "matrix.h"
 #include <fcntl.h>
 #include <stdio.h>
@@ -96,7 +97,7 @@ struct params new_params() {
   p.nb_codes[3] = 0;
   p.nb_codes[4] = 0;
   p.nb_nodes = 1;
-  p.flow_list = NULL;
+  p.flow_list = new_list();
   return p;
 }
 
@@ -138,7 +139,7 @@ int main(int argc, char *argv[]) {
   int nb_events = p.nb_codes[0] + p.nb_codes[1] + p.nb_codes[2] +
                   p.nb_codes[3] + p.nb_codes[4];
   printf("Number of nodes: %d\n", p.nb_nodes);
-  printf("Number of flows: %d\n", get_nb_flows(p.flow_list));
+  printf("Number of flows: %d\n", get_nb_flows(&p));
   printf("Number of events: %d\n", nb_events);
   printf("Number of packets emited (code 0): %d\n", p.nb_codes[0]);
   printf("Number of packets processed (code 2): %d\n", p.nb_codes[2]);
@@ -149,7 +150,7 @@ int main(int argc, char *argv[]) {
   printf("Lost rate: %f%%\n",
          ((float)(p.nb_codes[0] - p.nb_codes[3]) / p.nb_codes[0]) * 100);
 
-  free_flow(p.flow_list);
+  free_list(p.flow_list, free);
 
   print_matrix(&p);
   free_matrix(&p);

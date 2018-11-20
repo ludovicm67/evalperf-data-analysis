@@ -68,7 +68,7 @@ void print_matrix(struct params *p) {
   for (i = 0; i < p->nb_nodes * p->nb_nodes; i++) {
     if (i % p->nb_nodes == 0)
       printf("\n");
-    printf("  %d", p->mat[i]);
+    printf(" %3d", p->mat[i]);
   }
   printf("\n");
 }
