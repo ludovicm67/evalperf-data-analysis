@@ -56,10 +56,13 @@ void read_matrix(struct params *p) {
   free(line);
 }
 
-int get_node(int node1, int node2) {
-  int r = 42;
-  (void)node1;
-  (void)node2;
+int matrix_get(struct params *p, int node1, int node2) {
+  int r = 0;
+  if (!p || !p->mat)
+    return r;
+  r = p->mat[(node1 - 1) + (node2 - 1) * p->nb_nodes];
+  if (!r)
+    r = p->mat[(node2 - 1) + (node1 - 1) * p->nb_nodes];
   return r;
 }
 
