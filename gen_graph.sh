@@ -1,8 +1,10 @@
 #!/bin/sh
 
 if [ $# -ne 1 ]; then
-  echo "please specify a file in argument" >&2
-  exit 1
+  for f in ./graph_*.txt; do
+    eval "$0 $f"
+  done
+  exit 0
 fi
 
 if [ ! -f "$1" ]; then
