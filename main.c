@@ -121,8 +121,8 @@ void paquet_print(struct paquet *p) {
   printf(" - fid: %d\n", p->fid);
   printf(" - source: N%d\n", p->source);
   printf(" - destination: N%d\n", p->dest);
-  printf(" - start: t=%f\n", p->start);
-  printf(" - end: t=%f\n", p->end);
+  printf(" - life start: t=%f\n", p->start);
+  printf(" - end of life: t=%f\n", p->end);
   printf(" - lifetime: %f sec\n", p->end - p->start);
   printf(" - size: %f Mb\n", p->size);
   if (p->evts) {
@@ -134,6 +134,7 @@ void paquet_print(struct paquet *p) {
 void treat_line(char *line, struct params *p) {
   double t;
   int code, pid, fid, tos, bif, s, d, pos;
+  struct flow *f;
 
   // if we don't have 9 columns
   if (sscanf(line, "%lf %d %d %d %d %d N%d N%d N%d", &t, &code, &pid, &fid,
@@ -176,6 +177,9 @@ void treat_line(char *line, struct params *p) {
     add_flow(p, fid, t);
     break;
   }
+
+  f = p->flow_list->l[fid];
+  f->nb_codes[code]++;
 }
 
 void treat_file(struct params *p) {
@@ -239,7 +243,7 @@ int main(int argc, char *argv[]) {
   int nb_errors = 0;
 
   // get arguments
-  while ((c = getopt(argc, argv, "+t:m:p:")) != EOF) {
+  while ((c = getopt(argc, argv, "+t:m:p:f:")) != EOF) {
     switch (c) {
     case 't':
       p.trace_file = optarg;
@@ -293,13 +297,20 @@ int main(int argc, char *argv[]) {
   printf("Number of destroyed packets (code 4): %d\n", p.nb_codes[4]);
   printf("Number of packets lost (code 0 - 3): %d\n",
          p.nb_codes[0] - p.nb_codes[3]);
-  printf("Lost rate: %f%%\n",
+  printf("Loss rate: %f%%\n",
          ((float)(p.nb_codes[0] - p.nb_codes[3]) / p.nb_codes[0]) * 100);
 
+  // if the user asked to trace a specific paquet, display results
   if (p.trace_paquet != -1) {
     printf("\n\n\nDisplaying traced paquet (#%d) as requested:",
            p.trace_paquet);
     paquet_print(p.traced_paquet);
+  }
+
+  // if the user asked to trace a specific flow, display results
+  if (p.trace_flow != -1) {
+    printf("\n\n\nDisplaying traced flow (#%d) as requested:", p.trace_flow);
+    flow_print(&p, p.trace_flow);
   }
 
   free_list(p.flow_list, free);

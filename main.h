@@ -1,7 +1,6 @@
 #ifndef __MAIN_H
 #define __MAIN_H
 
-#include <stdbool.h>
 #include <stdio.h>
 
 #ifndef DEBUG
