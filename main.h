@@ -46,6 +46,10 @@ struct params {
       *traced_paquet; // only set if we want to trace a specific paquet
 
   int trace_flow; // will contain the flow id to trace, or -1 if not set
+
+  // graph files
+  FILE *graph_paquets;
+  FILE *graph_paquet_lost;
 };
 
 struct params new_params();

@@ -132,6 +132,7 @@ void paquet_print(struct paquet *p) {
 }
 
 void treat_line(char *line, struct params *p) {
+  char buf[BUFF_SIZE];
   double t;
   int code, pid, fid, tos, bif, s, d, pos;
   struct flow *f;
@@ -170,12 +171,18 @@ void treat_line(char *line, struct params *p) {
     paquet_add_evt(p, p->traced_paquet, t, code, pos);
   }
 
-  switch (code) {
-  case 0:
-  case 3:
-  case 4:
+  if (code == 4) {
+    sprintf(buf, "%f %d\n", t, p->nb_codes[4]);
+    fwrite(buf, 1, strlen(buf), p->graph_paquet_lost);
+  }
+
+  if (code == 0 || code == 3 || code == 4) {
+    // graph: nb paquets
+    sprintf(buf, "%f %d\n", t,
+            p->nb_codes[0] - p->nb_codes[3] - p->nb_codes[4]);
+    fwrite(buf, 1, strlen(buf), p->graph_paquets);
+    // create/update flow
     add_flow(p, fid, t);
-    break;
   }
 
   f = p->flow_list->l[fid];
@@ -234,6 +241,17 @@ struct params new_params() {
   p.flow_list = new_list();
   p.trace_paquet = -1;
   p.trace_flow = -1;
+
+  if ((p.graph_paquets = fopen("./graph_nb_paquets.txt", "w+")) == NULL) {
+    perror("fopen");
+    exit(EXIT_FAILURE);
+  }
+
+  if ((p.graph_paquet_lost = fopen("./graph_lost_paquets.txt", "w+")) == NULL) {
+    perror("fopen");
+    exit(EXIT_FAILURE);
+  }
+
   return p;
 }
 
