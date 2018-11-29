@@ -4,4 +4,5 @@ main
 out.*
 t?t?
 *.data
-*.png
+*.pdf
+
