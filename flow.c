@@ -9,7 +9,7 @@ struct flow_params {
   double ts;
 };
 
-struct flow *new_flow(int fid, double begin) {
+struct flow *flow_new(int fid, double begin) {
   struct flow *f = malloc(sizeof(struct flow));
   f->fid = fid;
   f->begin = begin;
@@ -22,18 +22,12 @@ struct flow *new_flow(int fid, double begin) {
   return f;
 }
 
-void free_flow(struct flow *f) {
-  if (f == NULL)
-    return;
-  free(f);
-}
-
 void *list_cb(void *arg) {
   struct flow_params *p = (struct flow_params *)arg;
-  return new_flow(p->fid, p->ts);
+  return flow_new(p->fid, p->ts);
 }
 
-void add_flow(struct params *p, int fid, double ts) {
+void flow_add(struct params *p, int fid, double ts) {
   struct flow_params fp;
   struct flow *f;
   fp.fid = fid;
@@ -45,7 +39,7 @@ void add_flow(struct params *p, int fid, double ts) {
   f->end = ts;
 }
 
-int get_nb_flows(struct params *p) {
+int flow_nb(struct params *p) {
   if (!p || !p->flow_list)
     return 0;
   return p->flow_list->length;

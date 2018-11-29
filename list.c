@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct list *new_list() {
+struct list *list_new() {
   struct list *l = malloc(sizeof(struct list));
   l->size = LIST_INITIAL_SIZE;
   l->length = 0;
@@ -11,7 +11,7 @@ struct list *new_list() {
   return l;
 }
 
-void free_list(struct list *l, void (*cb)(void *)) {
+void list_free(struct list *l, void (*cb)(void *)) {
   unsigned int i;
   if (l) {
     if (cb) {

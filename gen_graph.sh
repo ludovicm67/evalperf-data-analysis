@@ -14,7 +14,7 @@ fi
 
 f_in="$1"
 f_out="$(echo "$1" | sed 's/\.txt$//').png"
-g_title="$(echo "$1" | sed 's/^graph_//' | sed 's/\.txt$//' | sed 's/_/ /')"
+g_title="$(echo "$1" | sed 's/^\.\///' | sed 's/^graph_//' | sed 's/\.txt$//' | sed 's/_/ /')"
 
 gnuplot << EOF
 set grid

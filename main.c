@@ -182,7 +182,7 @@ void treat_line(char *line, struct params *p) {
             p->nb_codes[0] - p->nb_codes[3] - p->nb_codes[4]);
     fwrite(buf, 1, strlen(buf), p->graph_paquets);
     // create/update flow
-    add_flow(p, fid, t);
+    flow_add(p, fid, t);
   }
 
   f = p->flow_list->l[fid];
@@ -238,7 +238,7 @@ struct params new_params() {
   p.nb_codes[3] = 0;
   p.nb_codes[4] = 0;
   p.nb_nodes = 1;
-  p.flow_list = new_list();
+  p.flow_list = list_new();
   p.trace_paquet = -1;
   p.trace_flow = -1;
 
@@ -306,7 +306,7 @@ int main(int argc, char *argv[]) {
   int nb_events = p.nb_codes[0] + p.nb_codes[1] + p.nb_codes[2] +
                   p.nb_codes[3] + p.nb_codes[4];
   printf("Number of nodes: %d\n", p.nb_nodes);
-  printf("Number of flows: %d\n", get_nb_flows(&p));
+  printf("Number of flows: %d\n", flow_nb(&p));
   printf("Number of events: %d\n", nb_events);
   printf("Number of packets emited (code 0): %d\n", p.nb_codes[0]);
   printf("Number of packets arrivals (code 1): %d\n", p.nb_codes[1]);
@@ -331,7 +331,7 @@ int main(int argc, char *argv[]) {
     flow_print(&p, p.trace_flow);
   }
 
-  free_list(p.flow_list, free);
+  list_free(p.flow_list, free);
 
 #if DEBUG
   print_matrix(&p);
@@ -339,6 +339,10 @@ int main(int argc, char *argv[]) {
 
   free_matrix(&p);
   paquet_free(p.traced_paquet);
+
+  // close files used to generate data for gnuplot
+  fclose(p.graph_paquets);
+  fclose(p.graph_paquet_lost);
 
   exit(EXIT_SUCCESS);
 }

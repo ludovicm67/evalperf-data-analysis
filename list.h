@@ -9,8 +9,8 @@ struct list {
   void **l;
 };
 
-struct list *new_list();
-void free_list(struct list *l, void (*cb)(void *));
+struct list *list_new();
+void list_free(struct list *l, void (*cb)(void *));
 void *list_get(struct list *l, unsigned int index, void *(*cb)(void *),
                void *args);
 
