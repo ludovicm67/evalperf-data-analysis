@@ -31,6 +31,10 @@ struct paquet {
   struct paquet *next;
 };
 
+struct node {
+  int nb_codes[5]; // indexes representing code from 1 to 4
+};
+
 struct params {
   char *mat_file;
   char *trace_file;
@@ -38,6 +42,7 @@ struct params {
   int nb_nodes;
   int nb_codes[5]; // indexes representing code from 1 to 4
   struct list *flow_list;
+  struct list *node_list;
   int *mat;
   FILE *mat_stream;
 

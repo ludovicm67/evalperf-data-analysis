@@ -67,6 +67,9 @@ en tant qu'index; en faisant cela, le temps d'éxécution de mon programme a ét
 divisé par deux. J'ai également réimplémenté une lecture de fichier bufférisé
 dans le but de limiter les accès disque.
 
+J'ai également vérifié la gestion de la mémoire avec `valgrind` et il chacun des
+blocs mémoire alloués sont bien libérés à la sortie du programme.
+
 # Résultats obtenus sur la trace fournie
 
 Voici les différents résultats obtenus avec l'outil que j'ai réalisé pour
@@ -88,6 +91,36 @@ Number of packets received (code 3): 715815
 Number of destroyed packets (code 4): 35164
 Number of packets lost (code 0 - 3): 35164
 Loss rate: 4.682421%
+
+
+Displaying nodes informations:
+(node / created#0 / arrived#1 / processed#2 / received#3 / dropped#4 / loss rate)
+ - N1        16707      36729      36729      22476        364 0.322110%
+ - N2        13107      15561      15561      12979          0 0.000000%
+ - N3        13386      13298      13298      13298          0 0.000000%
+ - N4       223002     419524     419524     215442      16878 1.303955%
+ - N5        20877      13206      13206      13206        132 0.217725%
+ - N6         6121      31698      31698       7937        589 0.754712%
+ - N7        55732      58520      58520      58520         15 0.006485%
+ - N8         7242      22798      22798       8764          0 0.000000%
+ - N9        15991      13036      13036      13036       1813 3.185620%
+ - N10       10013      12482      12482      12482        287 0.601097%
+ - N11        4175       4642       4642       4642          0 0.000000%
+ - N12       10018      14340      14340       9103          4 0.008367%
+ - N13       10017      10215      10215      10215         33 0.081091%
+ - N14       19460      15582      15582      15582       1669 2.458932%
+ - N15       18362      10617      10617      10617          0 0.000000%
+ - N16       48489      49695      49695      49695       2162 1.082429%
+ - N17       10903      10606      10606      10606          0 0.000000%
+ - N18       54130      57022      57022      49185       5883 2.635257%
+ - N19       56997      64993      64993      52447       2250 0.930983%
+ - N20       40392      32145      32145      32145        989 0.717623%
+ - N21       16834      12984      12984      12984       1691 2.942046%
+ - N22       27998      25619      25619      25619          0 0.000000%
+ - N23        7404       7223       7223       7223         29 0.099650%
+ - N24       10316      12350      12350      12350          0 0.000000%
+ - N25       22068      24343      24343      24343        376 0.393829%
+ - N26       11238      10919      10919      10919          0 0.000000%
 ```
 
 Il y a donc 26 noeuds au total, 3019 flux, 750 979 paquets émis (code 0),
@@ -97,6 +130,8 @@ détruits. On peut constater que l'ensemble des pertes, qui correspond à
 la différence entre les paquets émis et arrivés à destination, correspond au
 nombre de paquets détruits. On peut donc en déduire que l'ensemble des pertes
 correspondent bien à des destruction de paquets. Le taux de perte est de 4.68%.
+
+On peut également visualiser l'ensemble des statistiques par noeud.
 
 
 ## Traçage

@@ -1,3 +1,4 @@
+#include "list.h"
 #include "main.h"
 #include <fcntl.h>
 #include <stdio.h>
@@ -79,10 +80,24 @@ void print_matrix(struct params *p) {
 void free_matrix(struct params *p) {
   free(p->mat);
   fclose(p->mat_stream);
+  list_free(p->node_list, free);
 }
 
 void init_matrix(struct params *p) {
+  struct node *n;
+
   open_matrix_file(p);
   get_nb_nodes(p);
   read_matrix(p);
+
+  p->node_list = list_new_size(p->nb_nodes);
+  for (int i = 0; i < p->nb_nodes; i++) {
+    p->node_list->l[i] = malloc(sizeof(struct node));
+    n = p->node_list->l[i];
+    n->nb_codes[0] = 0;
+    n->nb_codes[1] = 0;
+    n->nb_codes[2] = 0;
+    n->nb_codes[3] = 0;
+    n->nb_codes[4] = 0;
+  }
 }

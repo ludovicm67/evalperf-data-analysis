@@ -4,10 +4,14 @@
 #include <string.h>
 
 struct list *list_new() {
+  return list_new_size(LIST_INITIAL_SIZE);
+}
+
+struct list *list_new_size(int size) {
   struct list *l = malloc(sizeof(struct list));
-  l->size = LIST_INITIAL_SIZE;
+  l->size = size;
   l->length = 0;
-  l->l = malloc(LIST_INITIAL_SIZE * sizeof(void *));
+  l->l = calloc(size, sizeof(void *));
   return l;
 }
 

@@ -136,6 +136,7 @@ void treat_line(char *line, struct params *p) {
   double t;
   int code, pid, fid, tos, bif, s, d, pos;
   struct flow *f;
+  struct node *n;
 
   // if we don't have 9 columns
   if (sscanf(line, "%lf %d %d %d %d %d N%d N%d N%d", &t, &code, &pid, &fid,
@@ -187,6 +188,9 @@ void treat_line(char *line, struct params *p) {
 
   f = p->flow_list->l[fid];
   f->nb_codes[code]++;
+
+  n = p->node_list->l[pos - 1];
+  n->nb_codes[code]++;
 }
 
 void treat_file(struct params *p) {
@@ -255,6 +259,25 @@ struct params new_params() {
   return p;
 }
 
+void nodes_print(struct params *p) {
+  struct node *n;
+  printf("\n\nDisplaying nodes informations:\n(node / created#0 / arrived#1 / "
+         "processed#2 / received#3 / dropped#4 / loss rate)\n");
+  if (!p || !p->node_list) {
+    printf("no data found.\n");
+    return;
+  }
+  for (int i = 1; i <= p->nb_nodes; i++) {
+    n = p->node_list->l[i - 1];
+    printf(" - N%-3d %10d %10d %10d %10d %10d %f%%\n", i, n->nb_codes[0],
+           n->nb_codes[1], n->nb_codes[2], n->nb_codes[3], n->nb_codes[4],
+           ((float)(n->nb_codes[4]) /
+            (n->nb_codes[0] + n->nb_codes[1] + n->nb_codes[2] + n->nb_codes[3] +
+             n->nb_codes[4])) *
+               100);
+  }
+}
+
 int main(int argc, char *argv[]) {
   struct params p = new_params();
   int c;
@@ -317,6 +340,8 @@ int main(int argc, char *argv[]) {
          p.nb_codes[0] - p.nb_codes[3]);
   printf("Loss rate: %f%%\n",
          ((float)(p.nb_codes[0] - p.nb_codes[3]) / p.nb_codes[0]) * 100);
+
+  nodes_print(&p);
 
   // if the user asked to trace a specific paquet, display results
   if (p.trace_paquet != -1) {

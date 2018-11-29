@@ -10,6 +10,7 @@ struct list {
 };
 
 struct list *list_new();
+struct list *list_new_size(int size);
 void list_free(struct list *l, void (*cb)(void *));
 void *list_get(struct list *l, unsigned int index, void *(*cb)(void *),
                void *args);
